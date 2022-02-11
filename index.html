@@ -1,0 +1,72 @@
+<!doctype html>
+<html>
+<head>
+<title>Cruzando la Calle Simulator</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.55.2/phaser.min.js"></script>
+</head>
+<body>
+<h1>Te falta calle</h1>
+<h2>MORAD M.D.L.R.</h2>
+
+<script>
+let game_w = 800;
+let game_h = 600;
+let config = {
+	width: game_w,
+	height: game_h,
+	physics: {
+		default:'arcade',
+		arcade: {
+			debug: atrue
+			}
+	}
+	scene: {
+		preload: preload,
+		create: create,
+		update: update
+	}
+};
+let game = new Phaser.Game(config);
+let bg_img;
+let player_img;
+let car1_img;
+let car2_img;
+let car3_img;
+let car4_img;
+let offset_x;
+function preload ()
+{
+	this.load.image("background", "background.png");
+	this.load.image("", "");
+	this.load.image("", "");
+	this.load.image("", "");
+	this.load.image("", "");
+}
+
+function create ()
+{
+	bg_img = this.add.image(game_w/2, game_h/2 , "background");
+	player_img = this.add.image(32, 64, "background");
+	car1_img = this.add.image(game_w-offset_x, 160, "background");
+	car2_img = this.add.image(game_w-offset_x, 224, "background");
+	car3_img = this.add.image(offset_x, 380, "background");
+	car4_img = this.add.image(offset_xcar2_img, 460, "background");
+	
+	
+	bg_img.setScale(scale_size);
+	player_img.setScale(scale_size);
+	car1_img.setScale(scale_size);
+	car1_img.flipX = true;
+	car2_img.setScale(scale_size);
+	car2_img.flipX = true;
+	car3_img.setScale(scale_size);
+	car4_img.setScale(scale_size);
+}
+function update ()
+{
+
+}
+</script>
+</body>
+</html>
+
