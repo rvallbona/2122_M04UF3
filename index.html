@@ -1,72 +1,171 @@
 <!doctype html>
+
 <html>
 <head>
 <title>Cruzando la Calle Simulator</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.55.2/phaser.min.js"></script>
 </head>
 <body>
-<h1>Te falta calle</h1>
-<h2>MORAD M.D.L.R.</h2>
+	<h1>Te falta calle</h1>
 
-<script>
-let game_w = 800;
-let game_h = 600;
-let config = {
-	width: game_w,
-	height: game_h,
-	physics: {
-		default:'arcade',
-		arcade: {
-			debug: atrue
+	<script>
+
+		let game_w = 800;
+		let game_h = 600;
+
+		let config = {
+			width: game_w,
+			height: game_h,
+			physics: {
+				default: 'arcade',
+				arcade: {
+					debug: true
+				}
+			},
+			scene: {
+				preload: preload,
+				create: create,
+				update: update
 			}
-	}
-	scene: {
-		preload: preload,
-		create: create,
-		update: update
-	}
-};
-let game = new Phaser.Game(config);
-let bg_img;
-let player_img;
-let car1_img;
-let car2_img;
-let car3_img;
-let car4_img;
-let offset_x;
-function preload ()
-{
-	this.load.image("background", "background.png");
-	this.load.image("", "");
-	this.load.image("", "");
-	this.load.image("", "");
-	this.load.image("", "");
-}
-
-function create ()
-{
-	bg_img = this.add.image(game_w/2, game_h/2 , "background");
-	player_img = this.add.image(32, 64, "background");
-	car1_img = this.add.image(game_w-offset_x, 160, "background");
-	car2_img = this.add.image(game_w-offset_x, 224, "background");
-	car3_img = this.add.image(offset_x, 380, "background");
-	car4_img = this.add.image(offset_xcar2_img, 460, "background");
+		}
 	
-	
-	bg_img.setScale(scale_size);
-	player_img.setScale(scale_size);
-	car1_img.setScale(scale_size);
-	car1_img.flipX = true;
-	car2_img.setScale(scale_size);
-	car2_img.flipX = true;
-	car3_img.setScale(scale_size);
-	car4_img.setScale(scale_size);
-}
-function update ()
-{
+		let game = new Phaser.Game(config);
 
-}
-</script>
+		let cursors;
+
+		let bg_img;
+
+		let player_img;
+		let player_speed = 2;
+		let player_x = game_w/2;
+		let player_y;
+
+		let car1_img;
+		let car2_img;
+		let car3_img;
+		let car4_img;
+
+		let car1_speed = 2;
+		let car2_speed = 2.50;
+		let car3_speed = 2;
+		let car4_speed = 3;
+
+		let scale_size = 0.75;
+		let offset_x = -200;
+		
+		let lives = 3;
+		let score = 0;
+		
+		let lives_txt = 3;
+		let score_txt = 0;
+
+		let road1_y = 80;
+		let road2_y = 220;
+		let road3_y = 370;
+		let road4_y = 510;
+		
+		let crossing = false;
+
+		function checkBounds (car){
+			if(car.flipX == false && car.x-offset_x < 0)
+				car.x = game_w-offset_x;
+			else if(car.flipX == true && car.x+offset_x > game_w)
+				car.x = offset_x;
+		}
+		function reset (){
+			crossing = false;
+			player_img.x = player_x;
+			player_img.y = player_y;
+			
+			car1_img.x = game_w-offset_x;
+			car1_img.y = road1_y;
+			
+			car2_img.x = game_w-offset_x;
+			car2_img.y = road2_y;
+			
+			car3_img.x = offset_x;
+			car3_img.y = road3_y;
+			
+			car4_img.x = offset_x;
+			car4_img.y = road4_y;
+		}
+		
+		function preload(){
+
+			cursors = this.input.keyboard.createCursorKeys();
+			this.load.image("background", "road.jpg");
+			this.load.image("player", "character.png");
+			this.load.image("car", "car.png");
+		}
+
+		function create(){
+			bg_image = this.add.image(game_w/2,game_h/2,"background");
+
+			player_img = this.add.image(game_w/2,50,"player");
+			this.physics.add.existing(player_img, false);
+
+			car1_img = this.add.image(game_w-offset_x,road1_y,"car");
+			this.physics.add.existing(car1_img, false);
+			car2_img = this.add.image(game_w-offset_x,road2_y,"car");
+			this.physics.add.existing(car2_img, false);
+			car3_img = this.add.image(offset_x,road3_y,"car");
+			this.physics.add.existing(car3_img, false);
+			car4_img = this.add.image(offset_x,road4_y,"car");
+			this.physics.add.existing(car4_img, false);
+
+			player_img.setScale(scale_size);
+			car1_img.setScale(scale_size);
+			car2_img.setScale(scale_size);
+			car3_img.setScale(scale_size);
+			car3_img.flipX = true;
+			car4_img.setScale(scale_size);
+			car4_img.flipX = true;
+
+			
+			let cars = [car1_img, car2_img, car3_img, car4_img];
+
+			for (let i = 0; i < cars.length; i++){
+				this.physics.add.collider(player_img, cars[i], function (player, car){
+				reset();
+				lives--;
+				lives_text.text = lives.toString();
+				});
+			}
+			this.add.text(game_w/2, 64, "VIDAS");
+			lives_txt = this.add.text(game_w/2+64, 64, "3");
+			this.add.text(game_w/2+128, 64, "PUNTOS");
+			score_txt = this.add.text(game_w/2+196, 64, "0");
+			
+		}
+
+		function update(){
+
+			if (cursors.up.isDown){
+				player_img.y -= player_speed;
+			}
+			else if(cursors.down.isDown){
+				player_img.y += player_speed;
+			}
+			if(cursors.left.isDown){
+				player_img.x -= player_speed;
+			}
+			else if(cursors.right.isDown){
+				player_img.x += player_speed;
+			}
+
+
+			car1_img.x -= car1_speed;
+			car2_img.x -= car2_speed;
+			car3_img.x += car3_speed;
+			car4_img.x += car4_speed;
+
+			checkBounds(car1_img);
+			checkBounds(car2_img);
+			checkBounds(car3_img);
+			checkBounds(car4_img);
+		}
+
+	</script>
+
 </body>
 </html>
-
