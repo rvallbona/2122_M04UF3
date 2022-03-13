@@ -1,0 +1,233 @@
+<!doctype html>
+<html>
+<head>
+<title>Cruzando la Calle Simulator</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.55.2/phaser.min.js"></script>
+</head>
+<body>
+<h1>Mata Marcianos Ramon Vallbona</h1>
+<script>
+let game_w = 800;
+let game_h = 600;
+
+let config = {
+	width: game_w,
+	height: game_h,
+	physics: {
+		default: 'arcade',
+		arcade: {
+			debug: true
+		}
+	},
+	scene: {
+		preload: preload,
+		create: create,
+		update: update
+
+	}
+}
+
+let game = new Phaser.Game(config);
+
+let cursors;
+
+let bg_img;
+let player_img;
+
+let player_speed = 2;
+
+let player_x = 50;
+let player_y = game_h/2;
+
+let bullet_img;
+let bullet_speed = -2;
+
+let marciano1_img;
+let marciano2_img;
+let marciano3_img;
+
+let marciano1_speed = 2;
+let marciano2_speed = 2;
+let marciano3_speed = 2;
+
+let road1_y = game_h/2-125;
+let road2_y = game_h/2+125;
+let road3_y = game_h/2;
+
+let road_offset_y = 96;
+
+let offset_x = -128;
+let scale_size = 0.75;
+
+let lives = 3;
+let score = 0;
+
+let lives_txt;
+let score_txt;
+
+let crossing = false;
+
+function reset ()
+{
+	player_img.x = player_x;
+	player_img.y = player_y;
+
+	marciano1_img.x = game_w-offset_x;
+	marciano1_img.y = road1_y;
+
+	marciano2_img.x = game_w-offset_x;
+	marciano2_img.y = road2_y;
+	
+	marciano3_img.x = game_w-offset_x;
+	marciano3_img.y = road2_y;
+
+	bullet_img.y = game_w+500;
+	bullet_img.x = road2_y+500;
+}
+
+function preload ()
+{
+	this.load.image("background", "background.png");
+	this.load.image("ship", "ship.png");
+	this.load.image("bullet", "bullet.png");
+	this.load.image("marciano1", "marciano.png");
+	this.load.image("marciano2", "marciano2.png");
+	this.load.image("marciano3", "marciano3.png");
+	
+}
+
+function create ()
+{
+	cursors = this.input.keyboard.createCursorKeys();
+
+	bg_img = this.add.image(game_w/2,game_h/2, "background");
+
+	bullet_img= this.add.image(800,800, "bullet");
+	this.physics.add.existing(bullet_img, false);
+
+	player_img = this.add.image(player_x, player_y, "ship");
+	this.physics.add.existing(player_img, false);
+
+	marciano1_img = this.add.image(game_w-offset_x, road1_y, "marciano1");
+	this.physics.add.existing(marciano1_img, false);
+	marciano2_img = this.add.image(game_w-offset_x, road2_y, "marciano2");
+	this.physics.add.existing(marciano2_img, false);
+	marciano3_img = this.add.image(game_w-offset_x, road3_y, "marciano3");
+	this.physics.add.existing(marciano3_img, false);
+
+	player_img.setScale(scale_size);
+	bullet_img.setScale(scale_size);
+
+	marciano1_img.setScale(scale_size);
+	marciano1_img.flipX = true;
+	marciano2_img.setScale(scale_size);
+	marciano2_img.flipX = true;
+	marciano3_img.setScale(scale_size);
+	marciano3_img.flipX = true;
+
+	let enemys = [marciano1_img, marciano2_img, marciano3_img];
+
+	for (let i = 0; i < enemys.length; i++){
+		this.physics.add.collider(player_img, enemys[i], function (player, enemys){
+			reset();
+
+			lives--;
+			lives_txt.text = lives.toString();
+		});
+	}
+
+	for (let i = 0; i < enemys.length; i++){
+       this.physics.add.collider(enemys[i], bullet_img, function (bullet, enemys){
+		marciano1_img.x = game_w-offset_x;
+		marciano1_img.y = road1_y;
+
+		marciano2_img.x = game_w-offset_x
+		marciano2_img.y = road2_y;
+		
+		marciano3_img.x = game_w-offset_x
+		marciano3_img.y = road3_y;
+
+		score++;
+		score_txt.text = score.toString();
+         });
+    }
+
+	this.add.text(game_w/2, 64, "VIDAS");
+	lives_txt = this.add.text(game_w/2+64, 64, "3");
+	
+	this.add.text(250, 64, "PUNTOS");
+	score_txt = this.add.text(320, 64, "0");
+}
+
+function update ()
+{
+	if (cursors.up.isDown){
+		player_img.y -= player_speed;
+	}
+	else if (cursors.down.isDown){
+		player_img.y += player_speed;		
+	}
+	else if (cursors.space.isDown){
+		bullet_img.y = player_img.y;
+		bullet_img.x = player_img.x;
+		
+	}	
+
+	marciano1_img.x -= marciano1_speed;
+	marciano2_img.x -= marciano2_speed;
+	marciano3_img.x -= marciano3_speed;
+	bullet_img.x -= bullet_speed;
+
+	if (marciano1_img.flipX && marciano1_img.x < offset_x){
+      	marciano1_img.x = game_w-offset_x;
+		lives--;
+		lives_txt.text = lives.toString();
+	}
+   else if (!marciano1_img.flipX && marciano1_img.x > game_w-offset_x){
+      	marciano1_img.x = offset_x;
+		lives--;
+		lives_txt.text = lives.toString();
+	}
+    if (marciano2_img.flipX && marciano2_img.x < offset_x){
+      	marciano2_img.x = game_w-offset_x;
+		lives--;
+		lives_txt.text = lives.toString();
+	}
+   else if (!marciano2_img.flipX && marciano2_img.x > game_w-offset_x){
+    	marciano2_img.x = offset_x;
+		lives--;
+		lives_txt.text = lives.toString();
+	}
+	if (marciano3_img.flipX && marciano3_img.x < offset_x){
+      	marciano3_img.x = game_w-offset_x;
+		lives--;
+		lives_txt.text = lives.toString();
+	}
+	else if (!marciano3_img.flipX && marciano3_img.x > game_w-offset_x){
+    	marciano3_img.x = offset_x;
+		lives--;
+		lives_txt.text = lives.toString();
+	}
+
+	if (lives <= 0){
+		player_img.x = game_w-offset_x;
+		player_img.y = road1_y;
+
+		marciano1_img.x = game_w-offset_x;
+		marciano1_img.y = road1_y;
+
+		marciano2_img.x = game_w-offset_x
+		marciano2_img.y = road2_y;
+		
+		marciano3_img.x = game_w-offset_x
+		marciano3_img.y = road2_y;
+		
+		lives_txt=0;
+		this.add.text(game_w/2, game_h/2, "GAME OVER");		
+	}
+
+}
+
+</script>
+</body>
+</html>
